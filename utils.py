@@ -194,6 +194,81 @@ def draw_pearson(pearsons, title):
     plt.close()
 
 
+EXTRA_EVAL_SPLITS = {
+    'mix': ('mix_test.pkl', 'mix_val.pkl'),
+    'blind_cell': ('blind_cell_test.pkl', 'blind_cell_val.pkl'),
+    'blind_1_drug': ('blind_1_drug_test.pkl', 'blind_1_drug_val.pkl'),
+    'blind_1_drug_cell': ('blind_1_drug_cell_test.pkl', 'blind_1_drug_cell_val.pkl'),
+    'blind_2_drug': ('blind_2_drug_test.pkl', 'blind_2_drug_val.pkl'),
+    'blind_all': ('blind_all_test.pkl', 'blind_all_val.pkl'),
+}
+
+
+def iter_existing_eval_splits(data_split_path, split_map=None):
+    split_map = EXTRA_EVAL_SPLITS if split_map is None else split_map
+    for split_name, (test_file, val_file) in split_map.items():
+        if os.path.exists(os.path.join(data_split_path, test_file)):
+            yield split_name, test_file, val_file
+
+
+def build_split_dataset_name(dataset, split_file):
+    return dataset + '_' + split_file.replace('.pkl', '')
+
+
+def split_metric_name(split_name):
+    if split_name == 'mix':
+        return 'ret_mix_dc'
+    return 'ret_' + split_name
+
+
+def split_plot_suffix(split_name):
+    if split_name == 'mix':
+        return '_mix_dc'
+    return '_' + split_name
+
+
+def split_detail_filename(split_name):
+    return 'detail_result_' + split_name + '.csv'
+
+
+def plot_metric_value(ret):
+    if len(ret) > 2:
+        return ret[2]
+    return ret[-1]
+
+
+CORE_DATA_SPLIT_FILES = (
+    'train_dc',
+    'test_dc',
+    'val_dc',
+)
+
+
+EVAL_DATA_SPLIT_FILES = (
+    'mix_val',
+    'mix_test',
+    'blind_cell_val',
+    'blind_cell_test',
+    'blind_1_drug_val',
+    'blind_1_drug_test',
+    'blind_1_drug_cell_val',
+    'blind_1_drug_cell_test',
+    'blind_2_drug_val',
+    'blind_2_drug_test',
+    'blind_all_val',
+    'blind_all_test',
+)
+
+
+ALL_DATA_SPLIT_FILES = CORE_DATA_SPLIT_FILES + EVAL_DATA_SPLIT_FILES
+
+
+def save_dataframe_pickles(data_path, frame_map):
+    os.makedirs(data_path, exist_ok=True)
+    for name, frame in frame_map.items():
+        frame.to_pickle(os.path.join(data_path, f'{name}.pkl'))
+
+
 def plot_confusion_matrix(y_true, y_pred,
                           target_names,
                           title='Confusion matrix',
