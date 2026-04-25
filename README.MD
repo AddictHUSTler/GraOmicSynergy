@@ -14,15 +14,13 @@ python -m pip install -r requirements.txt
 
 ## Resources
 
-+ `data/`: GDSC dataset and processed splits
-+ `process_split_data.ipynb`: splits the data into training, validation, and test sets
-+ `create_data.ipynb`: builds the standard 2D PyTorch-format dataset
-+ `create_data_with_3d.ipynb`: builds the 2D + 3D PyTorch-format dataset
-+ `utils.py`: training utilities and dataset wrappers for the standard pipeline
-+ `pipeline/`: slim non-3D data-prep modules for feature loading and split construction
-+ `utils_with_3d.py`: utilities for the 2D + 3D pipeline
-+ `models/gin_add_at_cls.ipynb`, `models/gin_add_at_rmse.ipynb`: standard classification and regression training notebooks
-+ `models/gin_add_at_cls_with_3d.ipynb`, `models/gin_add_at_rmse_with_3d.ipynb`: classification and regression training notebooks using the 3D-enhanced input
++ `process_split_data.ipynb`: builds the split files in `data/split_data/`
++ `create_data.ipynb`: builds the processed `.pkl` files used for training
++ `utils.py`: shared dataset and training helpers
++ `pipeline/`: split and feature-loading helpers
++ `models/gin_add_at_rmse.ipynb`: regression training
++ `models/gin_add_atnew_rmse.ipynb`: regression variant
++ `models/gin_add_at_cls.ipynb`: classification training
 
 Gene expression data can be downloaded from:
 https://drive.google.com/file/d/1orMkX_4xC6N8fah98nUFJSuZueHOadX4/view?usp=sharing
@@ -33,28 +31,24 @@ https://drive.google.com/file/d/1orMkX_4xC6N8fah98nUFJSuZueHOadX4/view?usp=shari
 
 Run `process_split_data.ipynb` first.
 
-This step only needs to be run once. It prepares the train/validation/test splits that are reused by both the standard pipeline and the 3D pipeline.
+This creates the split files under `data/split_data/`.
 
-### 2. Choose a data creation path
-After `process_split_data.ipynb`, you can continue with either of these paths:
+### 2. Build the training data
+Run `create_data.ipynb` after the split files exist.
 
-+ Standard path: run `create_data.ipynb`, then train with the regular GIN notebooks in `models/`
-+ 3D path: run `create_data_with_3d.ipynb`, then train with the `*_with_3d.ipynb` notebooks in `models/`
-
-The 3D implementation is a simple concatenation of the 3D features with the existing 2D representation, so it uses the same processed split produced by `process_split_data.ipynb`.
+This notebook reads the split files, loads the drug graphs and omics features, and writes the processed `.pkl` files used by the training notebooks.
 
 ### 3. Train the models
 
-Standard notebooks:
+Use the notebooks in `models/` depending on the task you want to run:
 
 + Regression: `models/gin_add_at_rmse.ipynb`
++ Regression variant: `models/gin_add_atnew_rmse.ipynb`
 + Classification: `models/gin_add_at_cls.ipynb`
 
-3D notebooks:
-
-+ Regression: `models/gin_add_at_rmse_with_3d.ipynb`
-+ Classification: `models/gin_add_at_cls_with_3d.ipynb`
+These notebooks read the processed `.pkl` files from `data/split_data/.../processed/` and write logs, metrics, and plots under `model/save_model/...`.
 
 ## Notes
 
-The explanations for the runtime improvements are documented inside the training notebooks in the `models/` directory.
++ `process_split_data.ipynb` and `create_data.ipynb` are setup notebooks.
++ Once the `.pkl` files exist, you can rerun the model notebooks without rebuilding the data.
